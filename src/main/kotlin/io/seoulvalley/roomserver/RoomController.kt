@@ -1,11 +1,7 @@
 package io.seoulvalley.roomserver
 
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 @RestController
 class RoomController(val roomRepository: RoomRepository) {
@@ -28,8 +24,27 @@ class RoomController(val roomRepository: RoomRepository) {
         roomRepository.save(
             Room(
                 roomID = UUID.randomUUID().toString(),
-                peer = roomCreate.peerAddress
+                peers = mutableListOf(roomCreate.peerAddress)
             )
         )
     }
+
+    @GetMapping("/rooms/{roomID}")
+    fun getRoom(@PathVariable roomID: String): Optional<Room> {
+        return roomRepository.findById(roomID)
+    }
+
+    data class RoomJoin(
+        val peerAddress: String
+    )
+
+    @PutMapping("/rooms/{roomID}")
+    fun joinRoom(@PathVariable roomID: String, @RequestBody roomJoin: RoomJoin) {
+        val room = roomRepository.findById(roomID).get()
+
+        room.peers.add(roomJoin.peerAddress)
+
+        roomRepository.save(room)
+    }
+
 }

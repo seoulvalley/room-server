@@ -9,6 +9,6 @@ data class Room(
     @Indexed
     @Id
     val roomID: String,
-    val peer: String,
+    val peers: MutableList<String>,
 ) {
 }
